@@ -1,0 +1,13 @@
+name = "SpectralMethodFFT"
+uuid = "eb8f3aa5-f1cb-4848-920c-b54266032887"
+authors = ["Smooth Pudding"]
+version = "0.1.0"
+
+[compat]
+julia = "1.4"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
