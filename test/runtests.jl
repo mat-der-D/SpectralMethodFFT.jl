@@ -11,9 +11,9 @@ using Test
 
     k_f, k_g = k_x.((x_f, x_g))
     x_fg = x_k(k_f ⊙ k_g)
-    @test norm_x(x_fg - x_fg_exact) / (2π) < eps()
+    @test norm_x(x_fg - x_fg_exact) / (2π) < 2eps()
     x_fg = x_k(k_f ⊗ k_g)
-    @test norm_x(x_fg - x_fg_exact) / (2π) < eps()
+    @test norm_x(x_fg - x_fg_exact) / (2π) < 2eps()
 
     # +++++ 2-dimensional +++++
     c = ConfigFFT((64, 64), ((0., 2π), (0., 2π)))
