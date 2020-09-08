@@ -571,6 +571,12 @@ function K_dealiasedprod_23_K_K(f::KFunc, g::KFunc)
 
 end
 
+# +++ aliases +++
+# \odot
+⊙(f::KFunc, g::KFunc) = K_dealiasedprod_32_K_K(f, g)
+# \otimes
+⊗(f::KFunc, g::KFunc) = K_dealiasedprod_23_K_K(f, g)
+
 
 # *******************************************
 #  Fourier Transformation
@@ -620,16 +626,6 @@ function ∂Xaxis_K!(f::KFunc, axis::Int)
 
     f.vals .*= (2π*im/xlen)*Kcoord
 
-end
-
-const DIFFK! = (
-    (:∂x_k!, 1, 1),
-    (:∂x_kl!, 2, 1), (:∂y_kl!, 2, 2),
-    (:∂x_klm!, 3, 1), (:∂y_klm!, 3, 2), (:∂z_klm!, 3, 3)
-)
-
-for (op!, dim, axis) = DIFFK!
-    @eval $op!(f::KFunc{T,$dim}) where T = ∂Xaxis_K!(f, $axis)
 end
 
 # +++++ non-destructive +++++
