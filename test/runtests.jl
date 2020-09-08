@@ -19,7 +19,7 @@ using Test
     c = ConfigFFT((64, 64), ((0., 2π), (0., 2π)))
     xy_X, xy_Y = xy_Xgen(c), xy_Ygen(c)
     xy_f, xy_g = exp(cos(xy_X)), exp(cos(xy_Y))
-    xy_fg_exact = eps(cos(xy_X) + cos(xy_Y))
+    xy_fg_exact = exp(cos(xy_X) + cos(xy_Y))
 
     kl_f, kl_g = kl_xy.((xy_f, xy_g))
     xy_fg = xy_kl(kl_f ⊙ kl_g)
