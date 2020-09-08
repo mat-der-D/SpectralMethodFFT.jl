@@ -23,9 +23,9 @@ using Test
 
     kl_f, kl_g = kl_xy.((xy_f, xy_g))
     xy_fg = xy_kl(kl_f ⊙ kl_g)
-    @test norm_xy(xy_fg - xy_fg_exact) / ((2π)^2) < eps()
+    @test norm_xy(xy_fg - xy_fg_exact) / ((2π)^2) < 2eps()
     xy_fg = xy_kl(kl_f ⊗ kl_g)
-    @test norm_xy(xy_fg - xy_fg_exact) / ((2π)^2) < eps()
+    @test norm_xy(xy_fg - xy_fg_exact) / ((2π)^2) < 2eps()
 
     # +++++ 3-dimensional +++++
     c = ConfigFFT((64, 64, 64), ((0., 2π), (0., 2π), (0., 2π)))
@@ -36,8 +36,8 @@ using Test
 
     klm_f, klm_g = klm_xyz.((xyz_f, xyz_g))
     xyz_fg = xyz_klm(klm_f ⊙ klm_g)
-    @test norm_xyz(xyz_fg - xyz_fg_exact) / ((2π)^3) < eps()
+    @test norm_xyz(xyz_fg - xyz_fg_exact) / ((2π)^3) < 2eps()
     xyz_fg = xyz_klm(klm_f ⊗ klm_g)
-    @test norm_xyz(xyz_fg - xyz_fg_exact) / ((2π)^3) < eps()
+    @test norm_xyz(xyz_fg - xyz_fg_exact) / ((2π)^3) < 2eps()
 
 end
