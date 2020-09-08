@@ -6,23 +6,27 @@ using FFTW
 # *******************************************
 struct ConfigFFT{T<:Union{Float64,Complex{Float64}},N}
 
-    ngrids::NTuple{N,Int}
-                    # Number Of Grids
+    ngrids::NTuple{N,Int} # Number Of Grids
 
-    xranges::NTuple{N,NTuple{2,Float64}}
-                    # tuple of (min, max) s
+    xranges::NTuple{N,NTuple{2,Float64}} # tuple of (min, max) s
     Xcoords::NTuple{N,Array{Float64,N}}
-                    # X-coordinates
     Kcoords::NTuple{N,Array{Complex{Float64},N}}
-                    # K-coordinates
+
+    P_fft::FFTW.cFFTWPlan{T1} where T1
+    P_ifft::AbstractFFTs.ScaledPlan{T2} where T2
+    P_fftpad::FFTW.cFFTWPlan{T3} where T3
+    P_ifftpad::AbstractFFTs.ScaledPlan{T4} where T4
+
     cut_zigzag_mode::Bool
 
     # CONSTRUCTOR
     function ConfigFFT{T,N}(
-                ngrids, xranges, Xcoords, Kcoords;
+                ngrids, xranges, Xcoords, Kcoords,
+                P_fft, P_ifft, P_fftpad, P_ifftpad;
                 cut_zigzag_mode=true
             ) where N where T
         new(ngrids, xranges, Xcoords, Kcoords,
+            P_fft, P_ifft, P_fftpad, P_ifftpad,
             cut_zigzag_mode)
     end
 
@@ -40,8 +44,17 @@ struct ConfigFFT{T<:Union{Float64,Complex{Float64}},N}
         Xcoords = Xcoordsgen(ngrids, xranges)
         Kcoords = Kcoordsgen(ngrids, xranges)
 
+        P_fft = plan_fft(Xcoords[1])
+        P_ifft = plan_ifft(Xcoords[1])
+
+        pad_ngrids = @. ngrids ÷ 2 * 3
+        P_fftpad = plan_fft(zeros(pad_ngrids))
+        P_ifftpad = plan_ifft(zeros(pad_ngrids))
+
+
         return ConfigFFT{T,N}(
             ngrids, xranges, Xcoords, Kcoords,
+            P_fft, P_ifft, P_fftpad, P_ifftpad,
             cut_zigzag_mode=cut_zigzag_mode)
     end
 
@@ -487,13 +500,16 @@ function K_dealiasedprod_32_K_K(
 
     fvals_pad = padding(f)
     gvals_pad = padding(g)
+
+    P_fft = f.config.P_fftpad
+    P_ifft = f.config.P_ifftpad
     if T <: Real
-        fgvals_pad = fft(
-            real(ifft(fvals_pad)) .* real(ifft(gvals_pad))
+        fgvals_pad = P_fft * (
+            real(P_ifft * fvals_pad) .* real(P_ifft * gvals_pad)
         )
     else
-        fgvals_pad = fft(
-            ifft(fvals_pad) .* ifft(gvals_pad)
+        fgvals_pad = P_fft * (
+            (P_ifft * fvals_pad) .* (P_ifft * gvals_pad)
         )
     end
     fgvals = truncate(fgvals_pad, f.config)
@@ -583,7 +599,8 @@ end
 # *******************************************
 function K_X(f::XFunc{T,N}) where T where N
 
-    g = KFunc(fft(f.vals), f.config)
+    P = f.config.P_fft
+    g = KFunc(P * f.vals, f.config)
 
     if f.config.cut_zigzag_mode
         ngrids = f.config.ngrids
@@ -595,10 +612,11 @@ function K_X(f::XFunc{T,N}) where T where N
 end
 
 function X_K(f::KFunc{T,N}) where N where T
+    P = f.config.P_ifft
     if T <: Real
-        XFunc(real(ifft(f.vals)), f.config)
+        XFunc(real(P * f.vals), f.config)
     else
-        XFunc(ifft(f.vals), f.config)
+        XFunc(P * f.vals, f.config)
     end
 end
 
