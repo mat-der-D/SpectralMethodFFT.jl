@@ -58,7 +58,7 @@ function padding(f::KFunc)
     config = f.config
 
     ngrids = config.ngrids
-    pad_ngrids = @. ngrids ÷ 2 * 3
+    pad_ngrids = to_pad_ngrids(ngrids)
 
     slices = slices_padded_core(ngrids, pad_ngrids)
 
@@ -76,15 +76,9 @@ function truncate(
         ) where N where T
 
     ngrids = config.ngrids
-    pad_ngrids = @. ngrids ÷ 2 * 3
+    pad_ngrids = to_pad_ngrids(ngrids)
 
     slices = slices_padded_core(ngrids, pad_ngrids)
-
-    nshifts = @. pad_ngrids÷2 - ngrids÷2
-    min_nwaves = @. nshifts + 1
-    max_nwaves = @. nshifts + ngrids
-    slices = (:).(min_nwaves, max_nwaves)
-
     vals = ifftshift(fftshift(padded)[slices...])
 
     N_origin = prod(ngrids)
@@ -107,6 +101,11 @@ function slices_padded_core(
     return (:).(min_nwaves, max_nwaves)
 
 end
+
+function to_pad_ngrids(ngrids::NTuple{N,Int}) where N
+    @. ngrids ÷ 2 * 3
+end
+
 
 # de-aliased product by 2/3-rule (truncation)
 function K_dealiasedprod_23_K_K(f::KFunc, g::KFunc)
