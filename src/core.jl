@@ -5,6 +5,73 @@ using FFTW
 # *******************************************
 #  Configuration
 # *******************************************
+"""
+    ConfigFFT{T <: Union{Float64,Complex{Float64}},N}
+
+Assembly all basic configurations of the Fourier-spectral method.
+T represents the type of values of functions in 'real' space,
+and N represents the dimension. The followings are all members:
+
+    ngrids::NTuple{N,Int}
+... Each element means the number of grids in each axis
+
+    xranges::NTuple{N,NTuple{2,Float64}}
+... Tuple of ((xmin, xmax), (ymin, ymax), ...)
+
+    Xcoords::NTuple{N,Array{Float64,N}}
+... Coordinates of 'real' space in each axis
+
+    Kcoords::NTuple{N,Array{Complex{Float64},N}}
+... Wavenumbers in each axis. It is used to calculate derivatives.
+
+    P_fft, P_ifft, P_fftpad, P_ifftpad
+... Operators used to accelerate fft and ifft
+
+    cut_zigzag_mode::Bool
+... The highest mode is suppressed or not for axes whose grids number is even.
+If you use the easy constructor (explained below), it is set to be 'true' by default.
+This flag is used in 'X_K' and 'K_X' function, the fourier transformation. If you
+try to accelerate as much as possible and can manage the highest wavenumber mode,
+set 'cut_zigzag_mode=false'.
+
+For normal use, the easy constructor below is recommended for initialization.
+
+    ConfigFFT(
+        ngrids::NTuple{N,Int},
+        xranges::NTuple{N,NTuple{2,Float64}};
+        use_complex::Bool=false,
+        cut_zigzag_mode::Bool=true)
+
+The function in 'real' space is set to be real-valued (Float64) by default.
+If you want to use complex-valued function, set 'use_complex=true'.
+
+# Examples
+1) 1-dimensional case. The number of grid is 64, and the range is 0 ≦ x < 10.
+
+    julia> ngrids = (64,);
+
+    julia> xranges = ((0., 10.),);
+
+    julia> config = ConfigFFT(ngrids, xranges);
+
+2) 2-dimensional case. The numbers of grids are 128 in x-axis and 256 in y-axis.
+   The ranges in each axis are 0 ≦ x < 2π and 0 ≦ y < 4π.
+
+    julia> ngrids = (128, 256);
+
+    julia> xranges = ((0., 2π), (0., 4π));
+
+    julia> config = ConfigFFT(ngrids, xranges);
+
+3) 1-dimensional case. The number of grid is 64, and the range is 0 ≦ x < 30.
+   The complex-valued functions in 'real' space is used.
+
+   julia> ngrids = (64,);
+
+   julia> xranges = ((0., 30.),);
+
+   julia> config = ConfigFFT(ngrids, xranges, use_comples=true);
+"""
 struct ConfigFFT{T<:Union{Float64,Complex{Float64}},N}
 
     ngrids::NTuple{N,Int} # Number Of Grids
