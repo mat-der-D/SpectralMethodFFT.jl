@@ -83,7 +83,7 @@ function truncate(
     nshifts = @. pad_ngrids÷2 - ngrids÷2
     min_nwaves = @. nshifts + 1
     max_nwaves = @. nshifts + ngrids
-    slices = make_slice.(min_nwaves, max_nwaves)
+    slices = (:).(min_nwaves, max_nwaves)
 
     vals = ifftshift(fftshift(padded)[slices...])
 
@@ -104,7 +104,7 @@ function slices_padded_core(
     nshifts = @. pad_ngrids÷2 - ngrids÷2
     min_nwaves = @. nshifts + 1
     max_nwaves = @. nshifts + ngrids
-    return make_slice.(min_nwaves, max_nwaves)
+    return (:).(min_nwaves, max_nwaves)
 
 end
 

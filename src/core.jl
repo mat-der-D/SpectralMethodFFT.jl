@@ -358,7 +358,7 @@ function highpass_K!(
         min_indices = @. max(floors, floors + min_nwaves)
         max_indices = @. min(ceils, ceils + 1 - min_nwaves)
 
-        slices = make_slice.(min_indices, max_indices)
+        slices = (:).(min_indices, max_indices)
         pass_K!(f, slices)
     end
 end
@@ -397,7 +397,7 @@ function lowpass_K!(
             @. min(ceils, center_indices + max_nwaves)
         )
 
-        slices = make_slice.(min_indices, max_indices)
+        slices = (:).(min_indices, max_indices)
         pass_K!(f, slices)
     end
 
@@ -415,9 +415,6 @@ function K_lowpass_K(
     return g
 
 end
-
-# helper funtcion
-make_slice(x::Int, y::Int) = x:y
 
 
 # *******************************************
