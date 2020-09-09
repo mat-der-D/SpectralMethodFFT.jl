@@ -1,6 +1,8 @@
 module SpectralMethodFFT
 
-include("generalFFT.jl")
+include("core.jl")
+include("supplimentals.jl")
+include("specific_dimensions.jl")
 
 export ConfigFFT, XFunc, KFunc
 
