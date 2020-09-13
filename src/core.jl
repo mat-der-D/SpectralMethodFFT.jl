@@ -89,10 +89,11 @@ struct ConfigFFT{T<:Union{Float64,Complex{Float64}},N}
 
     # CONSTRUCTOR
     function ConfigFFT{T,N}(
-                ngrids, xranges, Xcoords, Kcoords,
-                P_fft, P_ifft, P_fftpad, P_ifftpad;
-                cut_zigzag_mode=true
-            ) where N where T
+            ngrids, xranges, Xcoords, Kcoords,
+            P_fft, P_ifft, P_fftpad, P_ifftpad;
+            cut_zigzag_mode=true
+        ) where N where T
+
         new(ngrids, xranges, Xcoords, Kcoords,
             P_fft, P_ifft, P_fftpad, P_ifftpad,
             cut_zigzag_mode)
@@ -119,7 +120,6 @@ struct ConfigFFT{T<:Union{Float64,Complex{Float64}},N}
         P_fftpad = plan_fft(zeros(pad_ngrids))
         P_ifftpad = plan_ifft(zeros(pad_ngrids))
 
-
         return ConfigFFT{T,N}(
             ngrids, xranges, Xcoords, Kcoords,
             P_fft, P_ifft, P_fftpad, P_ifftpad,
@@ -130,9 +130,9 @@ end
 
 # --- helper function for constuctor ---
 function Xcoordsgen(
-            ngrids::NTuple{N,Int},
-            xranges::NTuple{N,NTuple{2,Float64}}
-        ) where N
+        ngrids::NTuple{N,Int},
+        xranges::NTuple{N,NTuple{2,Float64}}
+    ) where N
 
     _Xcoordgen(axis) = Xcoordgen(axis, ngrids, xranges)
     return ntuple(_Xcoordgen, N)
@@ -140,10 +140,10 @@ function Xcoordsgen(
 end
 
 function Xcoordgen(
-            axis::Int,
-            ngrids::NTuple{N,Int},
-            xranges::NTuple{N,NTuple{2,Float64}}
-        ) where N
+        axis::Int,
+        ngrids::NTuple{N,Int},
+        xranges::NTuple{N,NTuple{2,Float64}}
+    ) where N
 
     ngrid = ngrids[axis]
     xrange = xranges[axis]
@@ -156,9 +156,9 @@ function Xcoordgen(
 end
 
 function Kcoordsgen(
-            ngrids::NTuple{N,Int},
-            xranges::NTuple{N,NTuple{2,Float64}}
-        ) where N
+        ngrids::NTuple{N,Int},
+        xranges::NTuple{N,NTuple{2,Float64}}
+    ) where N
 
     _Kcoordgen(axis) = Kcoordgen(axis, ngrids, xranges)
     return ntuple(_Kcoordgen, N)
@@ -166,16 +166,17 @@ function Kcoordsgen(
 end
 
 function Kcoordgen(
-            axis::Int,
-            ngrids::NTuple{N,Int},
-            xranges::NTuple{N,NTuple{2,Float64}}
-        ) where N
+        axis::Int,
+        ngrids::NTuple{N,Int},
+        xranges::NTuple{N,NTuple{2,Float64}}
+    ) where N
 
     ngrid = ngrids[axis]
     xrange = xranges[axis]
     _Kcoordgen(indices) = (
         kval(indices[axis], ngrid, xrange)
     )
+
     return _Kcoordgen.(CartesianIndices(ngrids))
 
 end
@@ -197,6 +198,49 @@ end
 # *******************************************
 #  XFunc
 # *******************************************
+"""
+    XFunc{T,N} <: AbstractArray{T,N}
+
+A struct of a function on 'real' space.
+It consists of the following:
+
+    vals::Array{T,N}
+... Values of the function on grids
+
+    config::ConfigFFT{T,N}
+... Configuration of Fourier Transformation
+
+For normal use, the easy constructor below is recommended for initialization.
+
+    XFunc(
+        vals::Array{Tc,N} where Tc <: Number,
+        config::ConfigFFT{T,N} where T
+        ) where N
+
+The type of elements of input 'vals' is converted to T.
+Instead, you may generate a XFunc object, whose values are undef as
+
+    XFunc(undef, config)
+
+XFunc type object is transformed by 'K_X' to KFunc type object,
+which represents a function in 'wavenumber' space.
+See also the explanation of KFunc.
+
+# Examples
+Suppose 'config' be ConfigFFT{Float64,2} type object,
+and c.ngrids = (2, 2). Then, for example,
+
+    v = [1. 2.; 3. 4.]
+    X_func = XFunc(v, config)
+
+generates a XFunc object whose 'vals' is v.
+If 'K_X' is applied to this function, say,
+
+    K_func = K_X(X_func)
+
+a new object 'K_func' is returned.
+It is KFunc type, and its 'vals' is Fourier transform of v.
+"""
 mutable struct XFunc{T,N} <: AbstractArray{T,N}
 
     vals::Array{T,N}
@@ -204,9 +248,9 @@ mutable struct XFunc{T,N} <: AbstractArray{T,N}
 
     # CONSTRUCTOR
     function XFunc{T,N}(
-                vals::Array{T,N},
-                config::ConfigFFT{T,N}
-            ) where N where T
+            vals::Array{T,N},
+            config::ConfigFFT{T,N}
+        ) where N where T
 
         if size(vals) == config.ngrids
             return new(vals, config)
@@ -218,19 +262,23 @@ mutable struct XFunc{T,N} <: AbstractArray{T,N}
 
     # EASY CONSTRUCTOR
     function XFunc(
-                vals::Array{Tv,N},
-                config::ConfigFFT{Tc,N}
-            ) where N where Tv <: Number where Tc
+            vals::Array{Tv,N},
+            config::ConfigFFT{Tc,N}
+        ) where N where Tv <: Number where Tc
 
-        XFunc{Tc,N}(Tc.(vals), config)
+        if Tv <: Complex && Tc <: Real
+            return XFunc{Tc,N}(Tc.(real(vals)), config)
+        else
+            return XFunc{Tc,N}(Tc.(vals), config)
+        end
 
     end
 
     # UNDEF CONSTRUCTOR
     function XFunc(
-                undef::UndefInitializer,
-                config::ConfigFFT{T,N}
-                ) where N where T
+            undef::UndefInitializer,
+            config::ConfigFFT{T,N}
+        ) where N where T
 
         f_undef = Array{T,N}(undef, config.ngrids)
         return XFunc{T,N}(f_undef, config)
@@ -242,16 +290,20 @@ end
 Base.:size(f::XFunc) = size(f.vals)
 
 Base.:getindex(f::XFunc, i::Int) = getindex(f.vals, i)
+
 function Base.:getindex(
-            f::XFunc{T,N}, I::Vararg{Int,N}
-        ) where N where T
+        f::XFunc{T,N}, I::Vararg{Int,N}
+    ) where N where T
+
     getindex(f.vals, I...)
 end
 
 Base.:setindex!(f::XFunc, v, i::Int) = setindex!(f.vals, v, i)
+
 function Base.:setindex!(
-            f::XFunc{T,N}, v, I::Vararg{Int,N}
-        ) where N where T
+        f::XFunc{T,N}, v, I::Vararg{Int,N}
+    ) where N where T
+
     setindex!(f, v, I...)
 end
 
@@ -261,6 +313,49 @@ Base.:copy(f::XFunc) = XFunc(copy(f.vals), f.config)
 # *******************************************
 #  KFunc
 # *******************************************
+"""
+    KFunc{T,N} <: AbstractArray{T,N}
+
+A struct of a function on 'wavenumber' space.
+It consists of the following:
+
+    vals::Array{Complex{Float64},N}
+... Values of the function on grids
+
+    config::ConfigFFT{T,N}
+... Configuration of Fourier Transformation
+
+For normal use, the easy constructor below is recommended for initialization.
+
+    KFunc(
+        vals::Array{Tc,N},
+        config::ConfigFFT{T,N}
+    ) where N where Tc <: Number where T
+
+The type of elements of input 'vals' is converted to T.
+Instead, you may generate a KFunc object, whose values are undef as
+
+    KFunc(undef, config)
+
+KFunc type object is transformed by 'X_K' to XFunc type object,
+which represents a function in 'real' space.
+See also the explanation of XFunc.
+
+# Examples
+Suppose 'config' be ConfigFFT{Float64,2} type object,
+and c.ngrids = (2, 2). Then, for example,
+
+    v = [1. 2.; 3. 4.]
+    K_func = KFunc(v, config)
+
+generates a XFunc object whose 'vals' is v.
+If 'X_K' is applied to this function, say,
+
+    X_func = X_K(K_func)
+
+a new object 'X_func' is returned.
+It is XFunc type, and its 'vals' is inverse-Fourier transform of v.
+"""
 mutable struct KFunc{T,N} <: AbstractArray{Complex{Float64},N}
 
     vals::Array{Complex{Float64},N}
@@ -268,9 +363,9 @@ mutable struct KFunc{T,N} <: AbstractArray{Complex{Float64},N}
 
     # CONSTRUCTOR
     function KFunc{T,N}(
-                vals::Array{Complex{Float64},N},
-                config::ConfigFFT{T,N}
-            ) where N where T
+            vals::Array{Complex{Float64},N},
+            config::ConfigFFT{T,N}
+        ) where N where T
 
         if size(vals) == config.ngrids
             return new(vals, config)
@@ -282,17 +377,18 @@ mutable struct KFunc{T,N} <: AbstractArray{Complex{Float64},N}
 
     # EASY CONSTRUCTOR
     function KFunc(
-                vals::Array{Tv,N},
-                config::ConfigFFT{Tc,N}
-            ) where N where Tv <: Number where Tc
-        KFunc{Tc,N}(complex(float(vals)), config)
+            vals::Array{Tv,N},
+            config::ConfigFFT{Tc,N}
+        ) where N where Tv <: Number where Tc
+
+        KFunc{Tc,N}(Tc.(vals), config)
     end
 
     # UNDEF CONSTRUCTOR
     function KFunc(
-                undef::UndefInitializer,
-                config::ConfigFFT{T,N}
-            ) where N where T
+            undef::UndefInitializer,
+            config::ConfigFFT{T,N}
+        ) where N where T
 
         f_undef = Array{Complex{Float64},N}(undef, config.ngrids)
         return KFunc{T,N}(f_undef, config)
@@ -304,16 +400,20 @@ end
 Base.:size(f::KFunc) = size(f.vals)
 
 Base.:getindex(f::KFunc, i::Int) = getindex(f.vals, i)
+
 function Base.:getindex(
-            f::KFunc{T,N}, I::Vararg{Int,N}
-        ) where N where T
+        f::KFunc{T,N}, I::Vararg{Int,N}
+    ) where N where T
+
     getindex(f.vals, I...)
 end
 
 Base.:setindex!(f::KFunc, v, i::Int) = setindex!(f.vals, v, i)
+
 function Base.:setindex!(
-            f::KFunc{T,N}, v, I::Vararg{Int,N}
-        ) where N where T
+        f::KFunc{T,N}, v, I::Vararg{Int,N}
+    ) where N where T
+
     setindex!(f, v, I...)
 end
 
@@ -400,9 +500,9 @@ end
 # *******************************************
 # +++++ general pass filter +++++
 function pass_K!(
-            f::KFunc{T,N},
-            slices::NTuple{N,UnitRange{Int}}
-        ) where N where T
+        f::KFunc{T,N},
+        slices::NTuple{N,UnitRange{Int}}
+    ) where N where T
 
     vals = copy(f.vals)
     vals[slices...] .= 0.0 + 0.0im
@@ -412,9 +512,10 @@ end
 
 # +++++ high-pass filter +++++
 function highpass_K!(
-            f::KFunc{T,N},
-            min_nwaves::NTuple{N,Int}
-        ) where N where T
+        f::KFunc{T,N},
+        min_nwaves::NTuple{N,Int}
+    ) where N where T
+
     ngrids = f.config.ngrids
     if any(@. min_nwaves > ngrids ÷ 2)
         println("WARNING: all waves are suppressed")
@@ -431,9 +532,9 @@ function highpass_K!(
 end
 
 function K_highpass_K(
-            f::KFunc{T,N},
-            min_nwaves::NTuple{N,Int}
-        ) where N where T
+        f::KFunc{T,N},
+        min_nwaves::NTuple{N,Int}
+    ) where N where T
 
     g = copy(f)
     highpass_K!(g, min_nwaves)
@@ -443,9 +544,9 @@ end
 
 # +++++ low-pass filter +++++
 function lowpass_K!(
-            f::KFunc{T,N},
-            max_nwaves::NTuple{N,Int}
-        ) where N where T
+        f::KFunc{T,N},
+        max_nwaves::NTuple{N,Int}
+    ) where N where T
 
     ngrids = f.config.ngrids
     f.vals .= fftshift(f.vals)
@@ -473,9 +574,9 @@ function lowpass_K!(
 end
 
 function K_lowpass_K(
-            f::KFunc{T,N},
-            max_nwaves::NTuple{N,Int}
-        ) where N where T
+        f::KFunc{T,N},
+        max_nwaves::NTuple{N,Int}
+    ) where N where T
 
     g = copy(f)
     lowpass_K!(g, max_nwaves)
@@ -502,6 +603,7 @@ function K_X(f::XFunc{T,N}) where T where N
 end
 
 function X_K(f::KFunc{T,N}) where N where T
+
     P = f.config.P_ifft
     if T <: Real
         XFunc(real(P * f.vals), f.config)
@@ -538,10 +640,12 @@ function X_∂Xaxis_X(f::XFunc, axis::Int)
 end
 
 function K_laplacian_K(f::KFunc{T,N} where T where N)
+
     return sum(
         K_∂Xaxis_K(K_∂Xaxis_K(f, axis), axis)
         for axis = 1:N
     )
+
 end
 
 K_Δ_K = K_laplacian_K
@@ -557,8 +661,8 @@ X_Δ_X = X_laplacian_X
 
 # de-aliased product by 3/2-rule (zero padding)
 function K_dealiasedprod_32_K_K(
-            f::KFunc{T,N}, g::KFunc{T,N}
-        ) where N where T
+        f::KFunc{T,N}, g::KFunc{T,N}
+    ) where N where T
 
     if !(f.config === g.config)
         return println("ERROR")
@@ -601,9 +705,9 @@ function padding(f::KFunc)
 end
 
 function truncate(
-            padded::Array{Complex{Float64},N},
-            config::ConfigFFT{T,N}
-        ) where N where T
+        padded::Array{Complex{Float64},N},
+        config::ConfigFFT{T,N}
+    ) where N where T
 
     ngrids = config.ngrids
     pad_ngrids = to_pad_ngrids(ngrids)
