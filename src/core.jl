@@ -381,7 +381,7 @@ mutable struct KFunc{T,N} <: AbstractArray{Complex{Float64},N}
             config::ConfigFFT{Tc,N}
         ) where N where Tv <: Number where Tc
 
-        KFunc{Tc,N}(Tc.(vals), config)
+        KFunc{Tc,N}(Complex{Float64}.(vals), config)
     end
 
     # UNDEF CONSTRUCTOR
