@@ -70,7 +70,7 @@ If you want to use complex-valued function, set 'use_complex=true'.
 
    julia> xranges = ((0., 30.),);
 
-   julia> config = ConfigFFT(ngrids, xranges, use_comples=true);
+   julia> config = ConfigFFT(ngrids, xranges, use_complex=true);
 """
 struct ConfigFFT{T<:Union{Float64,Complex{Float64}},N}
 
