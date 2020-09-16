@@ -642,8 +642,9 @@ end
 function K_laplacian_K(f::KFunc{T,N} where T where N)
 
     return sum(
-        K_∂Xaxis_K(K_∂Xaxis_K(f, axis), axis)
         for axis = 1:N
+            K_∂Xaxis_K(K_∂Xaxis_K(f, axis), axis)
+        end
     )
 
 end
