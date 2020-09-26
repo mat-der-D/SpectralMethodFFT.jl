@@ -272,11 +272,8 @@ mutable struct XFunc{T,N} <: AbstractArray{T,N}
             config::ConfigFFT{T,N}
         ) where N where T
 
-        if size(vals) == config.ngrids
-            return new(vals, config)
-        else
-            println("ERROR")
-        end
+        check_size_consistency(vals, config)
+        return new(vals, config)
 
     end
 
@@ -387,11 +384,8 @@ mutable struct KFunc{T,N} <: AbstractArray{Complex{Float64},N}
             config::ConfigFFT{T,N}
         ) where N where T
 
-        if size(vals) == config.ngrids
-            return new(vals, config)
-        else
-            println("ERROR")
-        end
+        check_size_consistency(vals, config)
+        return new(vals, config)
 
     end
 
@@ -457,11 +451,8 @@ Base.:inv(f::XFunc) = f \ 1.0
 for (op, opd) = BINOP
     @eval begin
         function Base.$op(f::XFunc, g::XFunc)
-            if f.config === g.config
-                return XFunc($opd(f.vals, g.vals), f.config)
-            else
-                println("ERROR")
-            end
+            check_config_consistency(f.config, g.config)
+            return XFunc($opd(f.vals, g.vals), f.config)
         end
 
         Base.$op(f::XFunc, a::Number) = (
@@ -483,11 +474,8 @@ Base.:inv(f::KFunc) = f \ 1.0
 for (op, opd) = BINOP
     @eval begin
         function Base.$op(f::KFunc, g::KFunc)
-            if f.config == g.config
-                return KFunc($opd(f.vals, g.vals), f.config)
-            else
-                println("ERROR")
-            end
+            check_config_consistency(f.confing, g.config)
+            return KFunc($opd(f.vals, g.vals), f.config)
         end
 
         Base.$op(f::KFunc, a::Number) = (
@@ -684,9 +672,7 @@ function K_dealiasedprod_32_K_K(
         f::KFunc{T,N}, g::KFunc{T,N}
     ) where N where T
 
-    if !(f.config === g.config)
-        return println("ERROR")
-    end
+    check_config_consistency(f.config, g.config)
 
     fvals_pad = padding(f)
     gvals_pad = padding(g)
@@ -764,9 +750,7 @@ end
 # de-aliased product by 2/3-rule (truncation)
 function K_dealiasedprod_23_K_K(f::KFunc, g::KFunc)
 
-    if !(f.config === g.config)
-        return println("ERROR")
-    end
+    check_config_consistency(f.config, g.config)
     config = f.config
     ngrids = config.ngrids
     max_nwaves = @. ngrids ÷ 3
