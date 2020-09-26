@@ -52,3 +52,11 @@ function l2inpr_X_X(f::XFunc{T,N}, g::XFunc{T,N}) where N where T
     end
 
 end
+
+
+# *******************************************
+#  Supplimental Tools
+# *******************************************
+function xlens_from_xranges(xranges)
+    return (x -> -(-(x...))).(xranges)
+end
