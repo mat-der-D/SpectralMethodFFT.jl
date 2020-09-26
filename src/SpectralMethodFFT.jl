@@ -1,6 +1,7 @@
 module SpectralMethodFFT
 
 include("core.jl")
+include("exceptions.jl")
 include("supplimentals.jl")
 include("specific_dimensions.jl")
 
@@ -35,5 +36,7 @@ export kl2_grad_kl, kl_rot_kl2, kl_div_kl2,
 export integ_X, integ_x, integ_xy, integ_xyz,
        norm_X, norm_x, norm_xy, norm_xyz,
        l2inpr_X_X, l2inpr_x_x, l2inpr_xy_xy, l2inpr_xyz_xyz
+
+export xlens_from_xranges
 
 end
