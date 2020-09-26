@@ -304,7 +304,7 @@ function Base.:setindex!(
         f::XFunc{T,N}, v, I::Vararg{Int,N}
     ) where N where T
 
-    setindex!(f, v, I...)
+    setindex!(f.vals, v, I...)
 end
 
 Base.:copy(f::XFunc) = XFunc(copy(f.vals), f.config)
@@ -414,7 +414,7 @@ function Base.:setindex!(
         f::KFunc{T,N}, v, I::Vararg{Int,N}
     ) where N where T
 
-    setindex!(f, v, I...)
+    setindex!(f.vals, v, I...)
 end
 
 Base.:copy(f::KFunc) = KFunc(copy(f.vals), f.config)
