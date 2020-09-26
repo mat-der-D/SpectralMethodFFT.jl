@@ -19,8 +19,7 @@ end
 function k_develop_k(k_u::KFunc, dt::Real)
 
     c = k_u.config
-    xrange = c.xranges[1]
-    xlen = xrange[2] - xrange[1]
+    xlen, = xlens_from_xranges(c.xranges)
     k_K = k_Kgen(c)
 
     return exp(- (2π*k_K/xlen)^2 * dt) * k_u
@@ -54,7 +53,9 @@ function main()
         t = @sprintf("%4.3f", t_st + it*dt)
         x_u = x_k(k_u)
         plt = plot(
-                x_X, x_u, label="heat at t=$t",
+                x_X, x_u,
+                title="t=$t",
+                label="heat",
                 ylims=(-0.1, 1.1),
                 xlabel="x", ylabel="u")
         frame(anim, plt)

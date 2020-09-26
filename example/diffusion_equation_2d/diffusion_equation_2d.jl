@@ -11,12 +11,6 @@ function xy_kl_init(c::ConfigFFT)
     xy_r = sqrt(xy_X^2 + xy_Y^2)
     xy_u = sinc(xy_r / 2)
     kl_u = kl_xy(xy_u)
-    # ngrids = c.ngrids
-    # ixiy_mid = ngrids .÷ 2 .+ 1
-    #
-    # xy_u = XFunc(zeros(ngrids), c)
-    # xy_u[ixiy_mid...] = 100.
-    # kl_u = kl_xy(xy_u)
 
     return xy_u, kl_u
 
@@ -26,9 +20,7 @@ end
 function kl_develop_kl(kl_u::KFunc, dt::Real)
 
     c = kl_u.config
-    xranges = c.xranges
-    xlens = (x -> -(-(x...))).(xranges)
-    xlen, ylen = xlens
+    xlen, ylen = xlens_from_xranges(c.xranges)
 
     kl_K = kl_Kgen(c)
     kl_L = kl_Lgen(c)
@@ -64,7 +56,7 @@ function main()
 
     anim = Animation()
     for it = 0:nt
-        t = @sprintf("%4.3f", t_st + it*dt)
+        t = @sprintf("%3.2f", t_st + it*dt)
         xy_u = xy_kl(kl_u)
         plt = plot(
                 xy_X[:,1], xy_Y[1,:], xy_u,
@@ -80,5 +72,6 @@ function main()
     gif(anim, "heat_2d.gif", fps=20)
 
 end
+
 
 main()
