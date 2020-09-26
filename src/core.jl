@@ -177,7 +177,7 @@ function Kcoordgen(
         kval(indices[axis], ngrid, xrange)
     )
 
-    flag_ngrid_power_of_2 = is_good_ngrid(ngrid)
+    flag_ngrid_power_of_2 = is_power_of_2(ngrid)
     if !flag_ngrid_power_of_2
         println("WARNING: ngrid[", axis, "]= ", ngrid, " should be power of 2 for FFTW efficiency")
     end
@@ -202,16 +202,17 @@ end
 """
 For FFTW efficiency, returns warning if ngrid is not a power of 2
 """
-function is_good_ngrid(ngrid)
+function is_power_of_2(num::Int)
 
-    flag_ngrid_power_of_2::Bool = false
-    for power in 0:20
-        if 2^power == ngrid
-            flag_ngrid_power_of_2 = true
-        end
+    if num<=0
+        errmsg="ngrid must be >0"
+        throw(DomainError(num, errmsg))
+    elseif num%2!=0
+        return num==1
+    else
+        return is_power_of_2(num÷2)
     end
 
-    return flag_ngrid_power_of_2
 end
 
 
