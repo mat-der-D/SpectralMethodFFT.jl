@@ -177,8 +177,7 @@ function Kcoordgen(
         kval(indices[axis], ngrid, xrange)
     )
 
-    flag_ngrid_power_of_2 = is_power_of_2(ngrid)
-    if !flag_ngrid_power_of_2
+    if !is_power_of_2(ngrid)
         println("WARNING: ngrid[", axis, "]= ", ngrid, " should be power of 2 for FFTW efficiency")
     end
 
