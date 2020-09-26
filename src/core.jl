@@ -177,7 +177,10 @@ function Kcoordgen(
         kval(indices[axis], ngrid, xrange)
     )
 
-    check_ngrid(ngrid)
+    flag_ngrid = is_good_ngrid(ngrid)
+    if !flag_ngrid
+        println("WARNING: ngrid[", axis, "]= ", ngrid, " should be power of 2 for FFTW efficiency")
+    end
 
     return _Kcoordgen.(CartesianIndices(ngrids))
 
@@ -199,7 +202,7 @@ end
 """
 For FFTW efficiency, returns warning if ngrid is not a power of 2
 """
-function check_ngrid(ngrid)
+function is_good_ngrid(ngrid)
 
     flag_ngrid::Bool = false
     for power in 0:20
@@ -207,9 +210,8 @@ function check_ngrid(ngrid)
             flag_ngrid = true
         end
     end
-    if !flag_ngrid
-        println("WARNING: ngrid= ", ngrid, " should be power of 2 for FFTW efficiency")
-    end
+
+    return flag_ngrid
 end
 
 
