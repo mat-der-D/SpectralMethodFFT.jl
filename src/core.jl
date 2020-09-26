@@ -177,6 +177,10 @@ function Kcoordgen(
         kval(indices[axis], ngrid, xrange)
     )
 
+    if !is_power_of_2(ngrid)
+        println("WARNING: ngrid[", axis, "]= ", ngrid, " should be power of 2 for FFTW efficiency")
+    end
+
     return _Kcoordgen.(CartesianIndices(ngrids))
 
 end
@@ -190,6 +194,22 @@ function kval(index, ngrid, xrange)::Complex{Float64}
         return 0
     elseif 2*index0 > ngrid
         return index0 - ngrid
+    end
+
+end
+
+"""
+For FFTW efficiency, returns warning if ngrid is not a power of 2
+"""
+function is_power_of_2(num::Int)
+
+    if num<=0
+        errmsg="ngrid must be >0"
+        throw(DomainError(num, errmsg))
+    elseif num%2!=0
+        return num==1
+    else
+        return is_power_of_2(num÷2)
     end
 
 end
