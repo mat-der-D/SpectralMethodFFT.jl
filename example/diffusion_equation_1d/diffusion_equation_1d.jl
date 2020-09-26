@@ -9,7 +9,7 @@ function x_k_init(c::ConfigFFT)
     ix_mid = ngrid÷2 + 1
 
     x_u = XFunc(zeros(ngrid), c)
-    x_u.vals[ix_mid] = 1.
+    x_u[ix_mid] = 1.
     k_u = k_x(x_u)
     return x_u, k_u
 
