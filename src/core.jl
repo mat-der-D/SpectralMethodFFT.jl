@@ -474,7 +474,7 @@ Base.:inv(f::KFunc) = f \ 1.0
 for (op, opd) = BINOP
     @eval begin
         function Base.$op(f::KFunc, g::KFunc)
-            check_config_consistency(f.confing, g.config)
+            check_config_consistency(f.config, g.config)
             return KFunc($opd(f.vals, g.vals), f.config)
         end
 
