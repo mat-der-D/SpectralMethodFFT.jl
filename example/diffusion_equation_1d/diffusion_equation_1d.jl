@@ -1,11 +1,15 @@
 using Plots
+using Printf
 using SpectralMethodFFT
 
 
 function x_k_init(c::ConfigFFT)
 
-    x_X = x_Xgen(c)
-    x_u = sinc(x_X)
+    ngrid = c.ngrids[1]
+    ix_mid = ngrid÷2 + 1
+
+    x_u = XFunc(zeros(ngrid), c)
+    x_u.vals[ix_mid] = 1.
     k_u = k_x(x_u)
     return x_u, k_u
 
@@ -30,13 +34,13 @@ function main()
     # Parameters
     # -------------
     # *** space ***
-    xrange = (-100., 100.)
+    xrange = (-10., 10.)
     ngrid = 128
     c = ConfigFFT((ngrid,), (xrange,))
     # *** time ***
     t_st = 0.
-    t_ed = 0.1
-    nt = 300
+    t_ed = 1.
+    nt = 200
     dt = (t_ed - t_st) / nt
 
     # -------------
@@ -47,14 +51,18 @@ function main()
 
     anim = Animation()
     for it = 0:nt
+        t = @sprintf("%4.3f", t_st + it*dt)
         x_u = x_k(k_u)
-        plt = plot(x_X.vals, x_u.vals, ylims=(-0.2, 1.2))
+        plt = plot(
+                x_X, x_u, label="heat at t=$t",
+                ylims=(-0.1, 1.1),
+                xlabel="x", ylabel="u")
         frame(anim, plt)
         if it < nt
             k_u = k_develop_k(k_u, dt)
         end
     end
-    gif(anim, "heat_1d.gif", fps=3)
+    gif(anim, "heat_1d.gif", fps=20)
 
 end
 
