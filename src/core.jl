@@ -596,7 +596,7 @@ end
 # *******************************************
 #  Fourier Transformation
 # *******************************************
-function K_X(f::XFunc{T,N}) where T where N
+function K_X(f::XFunc{T,N}) where {T,N}
 
     P = f.config.P_fft
     g = KFunc(P * f.vals, f.config)
@@ -647,7 +647,7 @@ function X_∂Xaxis_X(f::XFunc, axis::Int)
     X_K(K_∂Xaxis_K(K_X(f), axis))
 end
 
-function K_laplacian_K(f::KFunc{T,N} where T where N)
+function K_laplacian_K(f::KFunc{T,N}) where {T,N}
 
     return sum(
         K_∂Xaxis_K(K_∂Xaxis_K(f, axis), axis)
