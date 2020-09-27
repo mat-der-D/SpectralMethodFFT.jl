@@ -21,3 +21,35 @@ function check_size_consistency(
         throw(ErrorException(errmsg))
     end
 end
+
+
+"""
+warn_if_ngrid_is_not_power_of_2 displays warning
+if each ngrid in ngrids is not power of 2,
+for FFTW efficiency.
+"""
+function warn_if_ngrid_is_not_power_of_2(ngrids)
+    for (axis, ngrid) in enumerate(ngrids)
+        if !is_power_of_2(ngrid)
+            println(
+                "WARNING:",
+                " ngrids[", axis, "]=", ngrid,
+                " should be power of 2 for FFTW efficiency."
+            )
+        end
+    end
+end
+
+
+function is_power_of_2(num::Int)
+
+    if num<=0
+        errmsg="num must be >0"
+        throw(DomainError(num, errmsg))
+    elseif num%2!=0
+        return num==1
+    else
+        return is_power_of_2(num÷2)
+    end
+
+end
