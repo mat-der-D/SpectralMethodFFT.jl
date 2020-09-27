@@ -44,13 +44,8 @@ function norm_X(f::XFunc, p::Real=2)
 end
 
 function l2inpr_X_X(f::XFunc{T,N}, g::XFunc{T,N}) where {T,N}
-
-    if f.config === g.config
-        return ∫(f * g)
-    else
-        println("ERROR")
-    end
-
+    check_config_consistency(f.config, g.config)
+    return ∫(f * g)
 end
 
 
@@ -58,5 +53,5 @@ end
 #  Supplimental Tools
 # *******************************************
 function xlens_from_xranges(xranges)
-    return (x -> -(-(x...))).(xranges)
+    (x -> -(-(x...))).(xranges)
 end
