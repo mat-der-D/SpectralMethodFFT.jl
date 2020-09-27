@@ -92,7 +92,7 @@ struct ConfigFFT{T<:Union{Float64,Complex{Float64}},N}
             ngrids, xranges, Xcoords, Kcoords,
             P_fft, P_ifft, P_fftpad, P_ifftpad;
             cut_zigzag_mode=true
-        ) where N where T
+        ) where {T,N}
 
         new(ngrids, xranges, Xcoords, Kcoords,
             P_fft, P_ifft, P_fftpad, P_ifftpad,
@@ -233,9 +233,9 @@ It consists of the following:
 For normal use, the easy constructor below is recommended for initialization.
 
     XFunc(
-        vals::Array{Tc,N} where Tc <: Number,
-        config::ConfigFFT{T,N} where T
-        ) where N
+        vals::Array{Tc,N},
+        config::ConfigFFT{T,N}
+        ) where {N, Tc<:Number, T}
 
 The type of elements of input 'vals' is converted to T.
 Instead, you may generate a XFunc object, whose values are undef as
@@ -270,7 +270,7 @@ mutable struct XFunc{T,N} <: AbstractArray{T,N}
     function XFunc{T,N}(
             vals::Array{T,N},
             config::ConfigFFT{T,N}
-        ) where N where T
+        ) where {T,N}
 
         check_size_consistency(vals, config)
         return new(vals, config)
@@ -281,7 +281,7 @@ mutable struct XFunc{T,N} <: AbstractArray{T,N}
     function XFunc(
             vals::Array{Tv,N},
             config::ConfigFFT{Tc,N}
-        ) where N where Tv <: Number where Tc
+        ) where {N, Tv<:Number, Tc}
 
         if Tv <: Complex && Tc <: Real
             return XFunc{Tc,N}(Tc.(real(vals)), config)
@@ -295,7 +295,7 @@ mutable struct XFunc{T,N} <: AbstractArray{T,N}
     function XFunc(
             undef::UndefInitializer,
             config::ConfigFFT{T,N}
-        ) where N where T
+        ) where {T,N}
 
         f_undef = Array{T,N}(undef, config.ngrids)
         return XFunc{T,N}(f_undef, config)
@@ -310,7 +310,7 @@ Base.:getindex(f::XFunc, i::Int) = getindex(f.vals, i)
 
 function Base.:getindex(
         f::XFunc{T,N}, I::Vararg{Int,N}
-    ) where N where T
+    ) where {T,N}
 
     getindex(f.vals, I...)
 end
@@ -319,7 +319,7 @@ Base.:setindex!(f::XFunc, v, i::Int) = setindex!(f.vals, v, i)
 
 function Base.:setindex!(
         f::XFunc{T,N}, v, I::Vararg{Int,N}
-    ) where N where T
+    ) where {T,N}
 
     setindex!(f.vals, v, I...)
 end
@@ -347,7 +347,7 @@ For normal use, the easy constructor below is recommended for initialization.
     KFunc(
         vals::Array{Tc,N},
         config::ConfigFFT{T,N}
-    ) where N where Tc <: Number where T
+    ) where {N, Tc<:Number, T}
 
 The type of elements of input 'vals' is converted to T.
 Instead, you may generate a KFunc object, whose values are undef as
@@ -382,7 +382,7 @@ mutable struct KFunc{T,N} <: AbstractArray{Complex{Float64},N}
     function KFunc{T,N}(
             vals::Array{Complex{Float64},N},
             config::ConfigFFT{T,N}
-        ) where N where T
+        ) where {T,N}
 
         check_size_consistency(vals, config)
         return new(vals, config)
@@ -393,7 +393,7 @@ mutable struct KFunc{T,N} <: AbstractArray{Complex{Float64},N}
     function KFunc(
             vals::Array{Tv,N},
             config::ConfigFFT{Tc,N}
-        ) where N where Tv <: Number where Tc
+        ) where {N, Tv<:Number, Tc}
 
         KFunc{Tc,N}(Complex{Float64}.(vals), config)
     end
@@ -402,7 +402,7 @@ mutable struct KFunc{T,N} <: AbstractArray{Complex{Float64},N}
     function KFunc(
             undef::UndefInitializer,
             config::ConfigFFT{T,N}
-        ) where N where T
+        ) where {T,N}
 
         f_undef = Array{Complex{Float64},N}(undef, config.ngrids)
         return KFunc{T,N}(f_undef, config)
@@ -417,7 +417,7 @@ Base.:getindex(f::KFunc, i::Int) = getindex(f.vals, i)
 
 function Base.:getindex(
         f::KFunc{T,N}, I::Vararg{Int,N}
-    ) where N where T
+    ) where {T,N}
 
     getindex(f.vals, I...)
 end
@@ -426,7 +426,7 @@ Base.:setindex!(f::KFunc, v, i::Int) = setindex!(f.vals, v, i)
 
 function Base.:setindex!(
         f::KFunc{T,N}, v, I::Vararg{Int,N}
-    ) where N where T
+    ) where {T,N}
 
     setindex!(f.vals, v, I...)
 end
@@ -510,7 +510,7 @@ end
 function pass_K!(
         f::KFunc{T,N},
         slices::NTuple{N,UnitRange{Int}}
-    ) where N where T
+    ) where {T,N}
 
     vals = copy(f.vals)
     vals[slices...] .= 0.0 + 0.0im
@@ -522,7 +522,7 @@ end
 function highpass_K!(
         f::KFunc{T,N},
         min_nwaves::NTuple{N,Int}
-    ) where N where T
+    ) where {T,N}
 
     ngrids = f.config.ngrids
     if any(@. min_nwaves > ngrids ÷ 2)
@@ -542,7 +542,7 @@ end
 function K_highpass_K(
         f::KFunc{T,N},
         min_nwaves::NTuple{N,Int}
-    ) where N where T
+    ) where {T,N}
 
     g = copy(f)
     highpass_K!(g, min_nwaves)
@@ -554,7 +554,7 @@ end
 function lowpass_K!(
         f::KFunc{T,N},
         max_nwaves::NTuple{N,Int}
-    ) where N where T
+    ) where {T,N}
 
     ngrids = f.config.ngrids
     f.vals .= fftshift(f.vals)
@@ -584,7 +584,7 @@ end
 function K_lowpass_K(
         f::KFunc{T,N},
         max_nwaves::NTuple{N,Int}
-    ) where N where T
+    ) where {T,N}
 
     g = copy(f)
     lowpass_K!(g, max_nwaves)
@@ -610,7 +610,7 @@ function K_X(f::XFunc{T,N}) where T where N
     return g
 end
 
-function X_K(f::KFunc{T,N}) where N where T
+function X_K(f::KFunc{T,N}) where {T,N}
 
     P = f.config.P_ifft
     if T <: Real
@@ -670,7 +670,7 @@ X_Δ_X = X_laplacian_X
 # de-aliased product by 3/2-rule (zero padding)
 function K_dealiasedprod_32_K_K(
         f::KFunc{T,N}, g::KFunc{T,N}
-    ) where N where T
+    ) where {T,N}
 
     check_config_consistency(f.config, g.config)
 
@@ -713,7 +713,7 @@ end
 function truncate(
         padded::Array{Complex{Float64},N},
         config::ConfigFFT{T,N}
-    ) where N where T
+    ) where {T,N}
 
     ngrids = config.ngrids
     pad_ngrids = to_pad_ngrids(ngrids)
@@ -733,7 +733,7 @@ end
 function slices_padded_core(
         ngrids::NTuple{N1,Int},
         pad_ngrids::NTuple{N2,Int}
-    ) where N1 where N2
+    ) where {N1,N2}
 
     nshifts = @. pad_ngrids÷2 - ngrids÷2
     min_nwaves = @. nshifts + 1
