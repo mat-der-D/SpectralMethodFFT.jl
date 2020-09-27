@@ -43,7 +43,7 @@ function norm_X(f::XFunc, p::Real=2)
 
 end
 
-function l2inpr_X_X(f::XFunc{T,N}, g::XFunc{T,N}) where N where T
+function l2inpr_X_X(f::XFunc{T,N}, g::XFunc{T,N}) where {T,N}
 
     if f.config === g.config
         return ∫(f * g)
