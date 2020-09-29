@@ -104,6 +104,28 @@ for (klap, xlap, kΔ, xΔ, dim) = LAPLA
     end
 end
 
+# +++++ laplacian +++++
+const LAPINV = (
+    (:k_laplainv_k, :x_laplainv_x,
+        :k_Δ⁻¹_k, :x_Δ⁻¹_x, 1),
+    (:kl_laplainv_kl, :xy_laplainv_xy,
+        :kl_Δ⁻¹_kl, :xy_Δ⁻¹_xy, 2),
+    (:klm_laplainv_klm, :xyz_laplainv_xyz,
+        :klm_Δ⁻¹_klm, :xyz_Δ⁻¹_xyz, 3),
+)
+
+for (klinv, xlinv, kΔ⁻¹, xΔ⁻¹, dim) = LAPINV
+    @eval begin
+        KF = KFunc{T,$dim} where T
+        $klinv(f::KF) = K_laplainv_K(f)
+        XF = XFunc{T,$dim} where T
+        $xlinv(f::XF) = X_laplainv_X(f)
+        $kΔ⁻¹ = $klinv
+        $xΔ⁻¹ = $xlinv
+    end
+end
+
+
 # +++++ vector analysis +++++
 # 2-dimensional
 function kl2_grad_kl(kl_func::KFunc{T,2})::Vector{KFunc{T,2}} where T

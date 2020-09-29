@@ -642,6 +642,41 @@ K_Δ_K = K_laplacian_K
 X_laplacian_X = X_K ∘ K_laplacian_K ∘ K_X
 X_Δ_X = X_laplacian_X
 
+"""
+K_laplainv_K returns g satisfying Δg = f
+"""
+function K_laplainv_K(f::KFunc{T,N}) where {T,N}
+
+    c = f.config
+    xlens = xlens_xranges(c.xranges)
+
+    lap = - 4π^2 * sum(
+        (x -> x .^ 2).(c.Kcoords) ./ (xlens .^ 2)
+    )
+    lap_inv = 1 ./ lap
+    gvals = lap_inv .* f.vals
+
+    zero_coords = (
+        map(c.ngrids) do x
+            if x % 2 == 0
+                return (1, x÷2 + 1)
+            else
+                return (1,)
+            end
+        end
+    )
+    for icoords in Iterators.product(zero_coords...)
+        gvals[icoords...] = 0.
+    end
+
+    return KFunc(gvals, c)
+
+end
+
+K_Δ⁻¹_K = K_laplainv_K
+X_laplainv_X = X_K ∘ K_laplainv_K ∘ K_X
+X_Δ⁻¹_X = X_laplainv_X
+
 
 # *******************************************
 #  De-aliased Products

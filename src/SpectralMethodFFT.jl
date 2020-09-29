@@ -30,6 +30,13 @@ export K_laplacian_K, K_Δ_K,
        x_laplacian_x, xy_laplacian_xy, xyz_laplacian_xyz,
        x_Δ_x, xy_Δ_xy, xyz_Δ_xyz
 
+export K_laplainv_K, K_Δ⁻¹_K,
+       k_laplainv_k, kl_laplainv_kl, klm_laplainv_klm,
+       k_Δ⁻¹_k, kl_Δ⁻¹_kl, klm_Δ⁻¹_klm,
+       X_laplainv_X, X_Δ⁻¹_X,
+       x_laplainv_x, xy_laplainv_xy, xyz_laplainv_xyz,
+       x_Δ⁻¹_x, xy_Δ⁻¹_xy, xyz_Δ⁻¹_xyz
+
 export kl2_grad_kl, kl_rot_kl2, kl_div_kl2,
        klm3_grad_klm, klm3_rot_klm3, klm_div_klm3
 
@@ -37,6 +44,6 @@ export integ_X, integ_x, integ_xy, integ_xyz,
        norm_X, norm_x, norm_xy, norm_xyz,
        l2inpr_X_X, l2inpr_x_x, l2inpr_xy_xy, l2inpr_xyz_xyz
 
-export xlens_from_xranges
+export xlens_xranges
 
 end
