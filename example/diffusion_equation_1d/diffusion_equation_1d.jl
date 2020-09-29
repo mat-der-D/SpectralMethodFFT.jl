@@ -19,7 +19,7 @@ end
 function k_develop_k(k_u::KFunc, dt::Real)
 
     c = k_u.config
-    xlen, = xlens_from_xranges(c.xranges)
+    xlen, = xlens_xranges(c.xranges)
     k_K = k_Kgen(c)
 
     return exp(- (2π*k_K/xlen)^2 * dt) * k_u

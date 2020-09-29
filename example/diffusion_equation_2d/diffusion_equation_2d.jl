@@ -20,7 +20,7 @@ end
 function kl_develop_kl(kl_u::KFunc, dt::Real)
 
     c = kl_u.config
-    xlen, ylen = xlens_from_xranges(c.xranges)
+    xlen, ylen = xlens_xranges(c.xranges)
 
     kl_K = kl_Kgen(c)
     kl_L = kl_Lgen(c)

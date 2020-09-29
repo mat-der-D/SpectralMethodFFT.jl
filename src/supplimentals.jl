@@ -52,6 +52,6 @@ end
 # *******************************************
 #  Supplimental Tools
 # *******************************************
-function xlens_from_xranges(xranges)
+function xlens_xranges(xranges)
     (x -> -(-(x...))).(xranges)
 end
