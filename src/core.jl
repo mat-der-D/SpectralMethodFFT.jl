@@ -656,7 +656,7 @@ function K_laplainv_K(f::KFunc{T,N}) where {T,N}
     lap_inv = 1 ./ lap
     gvals = lap_inv .* f.vals
 
-    zero_coords = (
+    zero_indiceses = (
         map(c.ngrids) do x
             if x % 2 == 0
                 return (1, x÷2 + 1)
@@ -665,8 +665,8 @@ function K_laplainv_K(f::KFunc{T,N}) where {T,N}
             end
         end
     )
-    for icoords in Iterators.product(zero_coords...)
-        gvals[icoords...] = 0.
+    for indices in Iterators.product(zero_indiceses...)
+        gvals[indices...] = 0.
     end
 
     return KFunc(gvals, c)
