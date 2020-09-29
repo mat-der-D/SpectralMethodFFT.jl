@@ -40,7 +40,7 @@ export K_laplainv_K, K_Δ⁻¹_K,
 export kl2_grad_kl, kl_rot_kl2, kl_div_kl2,
        klm3_grad_klm, klm3_rot_klm3, klm_div_klm3
 
-export integ_X, integ_x, integ_xy, integ_xyz,
+export integ_X, integ_x, integ_xy, integ_xyz, ∫,
        norm_X, norm_x, norm_xy, norm_xyz,
        l2inpr_X_X, l2inpr_x_x, l2inpr_xy_xy, l2inpr_xyz_xyz
 
