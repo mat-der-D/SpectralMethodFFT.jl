@@ -473,7 +473,7 @@ end
 #  Operators for Complex Numbers
 # *******************************************
 const OPERATOR = (
-    :real, :imag, :reim, :conj
+    :real, :imag, :conj
 )
 
 for op = OPERATOR
@@ -483,6 +483,8 @@ for op = OPERATOR
     end
 end
 
+Base.:reim(f::XFunc) = (real(f), imag(f))
+Base.:reim(f::KFunc) = (real(f), imag(f))
 
 # *******************************************
 #  Low/High-pass Filter
