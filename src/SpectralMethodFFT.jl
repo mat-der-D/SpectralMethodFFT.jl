@@ -14,7 +14,10 @@ export pass_K!, highpass_K!, K_highpass_K, lopass_K!, K_lowpass_K,
        k_highpass_k, kl_highpass_kl, klm_highpass_klm,
        k_lowpass_k, kl_lowpass_kl, klm_lowpass_klm
 
-export K_dealiasedprod_32_K_K, K_dealiasedprod_23_K_K, ⊙, ⊗
+export K_prod_32_K_K, K_prod_23_K_K, ⊙, ⊗
+
+export K_dot_32_Ks_Ks, K3_cross_32_K3_K3,
+       K_dot_23_Ks_Ks, K3_cross_23_K3_K3
 
 export K_X, k_x, kl_xy, klm_xyz, X_K, x_k, xy_kl, xyz_klm
 

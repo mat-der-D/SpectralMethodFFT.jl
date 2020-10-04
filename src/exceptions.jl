@@ -22,6 +22,18 @@ function check_size_consistency(
     end
 end
 
+function check_length_consistency(
+        array1::Array, array2::Array
+    )
+
+    if length(array1) != length(array2)
+        errmsg = (
+            "lengths of arrays must be equal"
+        )
+        throw(ErrorException(errmsg))
+    end
+
+end
 
 """
 warn_if_ngrid_is_not_power_of_2 displays warning

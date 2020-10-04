@@ -1,7 +1,6 @@
 # fft version
 using FFTW
 
-
 # *******************************************
 #  Configuration
 # *******************************************
@@ -685,7 +684,7 @@ X_Δ⁻¹_X = X_laplainv_X
 # 2/3-rule ... truncating
 
 # de-aliased product by 3/2-rule (zero padding)
-function K_dealiasedprod_32_K_K(
+function K_prod_32_K_K(
         f::KFunc{T,N}, g::KFunc{T,N}
     ) where {T,N}
 
@@ -711,6 +710,90 @@ function K_dealiasedprod_32_K_K(
 
 end
 
+# dot-product
+function K_dot_32_Ks_Ks(
+        f::Array{KFunc{T,N},1},
+        g::Array{KFunc{T,N},1}
+    ) where {T,N}
+
+    check_length_consistency(f, g)
+    ndim = length(f)
+    for dim = 1:ndim
+        check_config_consistency(
+            f[dim].config, g[dim].config
+        )
+        if dim < ndim
+            check_config_consistency(
+                f[dim].config, f[dim+1].config
+            )
+        end
+    end
+
+    config = f[1].config
+
+    fvals_pad = padding.(f)
+    gvals_pad = padding.(g)
+
+    P_fft = config.P_fftpad
+    P_ifft = config.P_ifftpad
+
+    fgvals_pad = P_fft * sum(
+        (P_ifft * fvals_pad[dim]) .* (P_ifft * gvals_pad[dim])
+        for dim = 1:ndim
+    )
+
+    fgvals = truncate(fgvals_pad, config)
+    return KFunc(fgvals, config)
+
+end
+
+# cross-product
+function K3_cross_32_K3_K3(
+        f::Array{KFunc{T,N},1},
+        g::Array{KFunc{T,N},1}
+    ) where {T,N}
+
+    if !(length(f) == length(g) == 3)
+        errmsg = (
+            "lengths of arrays must be 3"
+        )
+        throw(ErrorException(errmsg))
+    end
+
+    config = f[1].config
+
+    fvals_pad = padding.(f)
+    gvals_pad = padding.(g)
+
+    P_fft = config.P_fftpad
+    P_ifft = config.P_ifftpad
+
+    xfvals_pad, yfvals_pad, zfvals_pad = [
+        P_ifft * fvals_pad[dim] for dim = 1:3
+    ]
+    xgvals_pad, ygvals_pad, zgvals_pad = [
+        P_ifft * gvals_pad[dim] for dim = 1:3
+    ]
+
+    fgvals = [
+        truncate( P_fft * (
+            yfvals_pad .* zgvals_pad .- zfvals_pad .* ygvals_pad
+        ), config),
+        truncate( P_fft * (
+            zfvals_pad .* xgvals_pad .- xfvals_pad .* zgvals_pad
+        ), config),
+        truncate( P_fft * (
+            xfvals_pad .* ygvals_pad .- yfvals_pad .* xgvals_pad
+        ), config),
+    ]
+
+    return [
+        KFunc(fgvals[dim], config) for dim = 1:3
+    ]
+
+end
+
+# padding helper functions
 function padding(f::KFunc)
     config = f.config
 
@@ -765,7 +848,7 @@ end
 
 
 # de-aliased product by 2/3-rule (truncation)
-function K_dealiasedprod_23_K_K(f::KFunc, g::KFunc)
+function K_prod_23_K_K(f::KFunc, g::KFunc)
 
     check_config_consistency(f.config, g.config)
     config = f.config
@@ -777,8 +860,75 @@ function K_dealiasedprod_23_K_K(f::KFunc, g::KFunc)
 
 end
 
+# dot-product
+function K_dot_23_Ks_Ks(
+        f::Array{KFunc{T,N},1},
+        g::Array{KFunc{T,N},1}
+    ) where {T,N}
+
+    check_length_consistency(f, g)
+    ndim = length(f)
+    for dim = 1:ndim
+        check_config_consistency(
+            f[dim].config, g[dim].config
+        )
+        if dim < ndim
+            check_config_consistency(
+                f[dim].config, f[dim+1].config
+            )
+        end
+    end
+
+    config = f[1].config
+    ngrids = config.ngrids
+    max_nwaves = ngrids .÷ 3
+    f_trunc = [
+        K_lowpass_K(f[dim], max_nwaves)
+        for dim = 1:ndim
+    ]
+    g_trunc = [
+        K_lowpass_K(g[dim], max_nwaves)
+        for dim = 1:ndim
+    ]
+    return K_X(
+        sum( X_K.(f_trunc) .* X_K.(g_trunc) )
+    )
+
+end
+
+# cross-product
+function K3_cross_23_K3_K3(
+        f::Array{KFunc{T,N},1},
+        g::Array{KFunc{T,N},1}
+    ) where {T,N}
+
+    if !(length(f) == length(g) == 3)
+        errmsg = (
+            "lengths of arrays must be 3"
+        )
+        throw(ErrorException(errmsg))
+    end
+
+    config = f[1].config
+    ngrids = config.ngrids
+    max_nwaves = ngrids .÷ 3
+    X_xf, X_yf, X_zf = X_K.([
+        K_lowpass_K(f[dim], max_nwaves) for dim = 1:3
+    ])
+    X_xg, X_yg, X_zg = X_K.([
+        K_lowpass_K(g[dim], max_nwaves) for dim = 1:3
+    ])
+
+    return K_X.([
+        X_yf * X_zg - X_zf * X_yg,
+        X_zf * X_xg - X_xf * X_zg,
+        X_xf * X_yg - X_yf * X_xg
+    ])
+
+end
+
 # +++++ aliases +++++
 # \odot
-⊙(f::KFunc, g::KFunc) = K_dealiasedprod_32_K_K(f, g)
+⊙(f::KFunc, g::KFunc) = K_prod_32_K_K(f, g)
 # \otimes
-⊗(f::KFunc, g::KFunc) = K_dealiasedprod_23_K_K(f, g)
+⊗(f::KFunc, g::KFunc) = K_prod_23_K_K(f, g)
