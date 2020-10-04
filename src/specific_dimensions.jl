@@ -174,7 +174,7 @@ function klm3_grad_klm(
 
 end
 
-function klm3_rot_klm(
+function klm3_rot_klm3(
             klm3_func::Vector{KFunc{T,3}}
         )::Vector{KFunc{T,3}} where T
 
