@@ -8,7 +8,7 @@ include("specific_dimensions.jl")
 export ConfigFFT, XFunc, KFunc
 
 export x_Xgen, xy_Xgen, xy_Ygen, xyz_Xgen, xyz_Ygen, xyz_Zgen,
-       k_Kgen, kl_Kgen, kl_Lgen, klm_Kgen, klm_Lgen, klm_Lgen
+       k_Kgen, kl_Kgen, kl_Lgen, klm_Kgen, klm_Lgen, klm_Mgen
 
 export pass_K!, highpass_K!, K_highpass_K, lopass_K!, K_lowpass_K,
        k_highpass_k, kl_highpass_kl, klm_highpass_klm,
