@@ -927,7 +927,18 @@ function K3_cross_23_K3_K3(
 end
 
 # +++++ aliases +++++
+# --- 3/2-rule ---
+# \ast
+∗(f, g) = K_prod_32_K_K(f, g)
+# \cdot
+⋅(f, g) = K_dot_32_Ks_Ks(f, g)
+# \times
+×(f, g) = K3_cross_32_K3_K3(f, g)
+
+# --- 2/3-rule ---
+# \circledast
+⊛(f, g) = K_prod_23_K_K(f, g)
 # \odot
-⊙(f::KFunc, g::KFunc) = K_prod_32_K_K(f, g)
+⊙(f, g) = K_dot_23_Ks_Ks(f, g)
 # \otimes
-⊗(f::KFunc, g::KFunc) = K_prod_23_K_K(f, g)
+⊗(f, g) = K3_cross_23_K3_K3(f, g)
