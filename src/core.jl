@@ -652,8 +652,7 @@ function K_laplainv_K(f::KFunc{T,N}) where {T,N}
     lap = - 4π^2 * sum(
         (x -> x .^ 2).(c.Kcoords) ./ (xlens .^ 2)
     )
-    lap_inv = 1 ./ lap
-    gvals = lap_inv .* f.vals
+    gvals = f.vals ./ lap
 
     zero_indiceses = (
         map(c.ngrids) do x
