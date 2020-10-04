@@ -130,7 +130,7 @@ end
 # 2-dimensional
 function kl2_grad_kl(kl_func::KFunc{T,2})::Vector{KFunc{T,2}} where T
     return [
-        kl_∂x_kl(kl_func)
+        kl_∂x_kl(kl_func),
         kl_∂y_kl(kl_func)
     ]
 end
@@ -167,8 +167,8 @@ function klm3_grad_klm(
         )::Vector{KFunc{T,3}} where T
 
     return [
-        klm_∂x_klm(klm_func)
-        klm_∂y_klm(klm_func)
+        klm_∂x_klm(klm_func),
+        klm_∂y_klm(klm_func),
         klm_∂z_klm(klm_func)
     ]
 
@@ -182,8 +182,8 @@ function klm3_rot_klm3(
         return println("ERROR")
     end
     return [
-        klm_∂y_klm(klm3_func[3]) - klm_∂z_klm(klm3_func[2])
-        klm_∂z_klm(klm3_func[1]) - klm_∂x_klm(klm3_func[3])
+        klm_∂y_klm(klm3_func[3]) - klm_∂z_klm(klm3_func[2]),
+        klm_∂z_klm(klm3_func[1]) - klm_∂x_klm(klm3_func[3]),
         klm_∂x_klm(klm3_func[2]) - klm_∂y_klm(klm3_func[1])
     ]
 
