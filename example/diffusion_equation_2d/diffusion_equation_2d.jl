@@ -3,6 +3,15 @@ using Printf
 using SpectralMethodFFT
 
 
+"""
+    xy_kl_init(c::ConfigFFT)
+
+Impose initial condition as sinc function
+
+    ```
+    u(x,y) = sinc(\sqrt{x^2+y^2})
+    ```
+"""
 function xy_kl_init(c::ConfigFFT)
 
     xy_X = xy_Xgen(c)
@@ -17,6 +26,15 @@ function xy_kl_init(c::ConfigFFT)
 end
 
 
+"""
+    kl_develop_kl(k_u::KFunc, dt::Real)
+
+Compute next time step of diffusion equation
+
+    ```
+    u^{n+1} = exp(-4π^2 Δt ((kx/Lx)^2 + (ky/Ly)^2) ) u^n
+    ```
+"""
 function kl_develop_kl(kl_u::KFunc, dt::Real)
 
     c = kl_u.config
