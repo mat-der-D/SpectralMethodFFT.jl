@@ -3,6 +3,16 @@ using Printf
 using SpectralMethodFFT
 
 
+"""
+    x_k_init(c::ConfigFFT)
+
+Impose delta function as initial condition
+
+    ```
+    u(x)  = 1 (x = 0)
+            = 0 (else)
+    ```
+"""
 function x_k_init(c::ConfigFFT)
 
     ngrid = c.ngrids[1]
@@ -16,6 +26,18 @@ function x_k_init(c::ConfigFFT)
 end
 
 
+"""
+    k_develop_k(k_u::KFunc, dt::Real)
+
+Compute next time step of diffusion equation
+
+    ```
+    u^{n+1} = exp(-(2πk/L)^2 Δt) u^n
+    ```
+"""
+function hoge()
+
+end
 function k_develop_k(k_u::KFunc, dt::Real)
 
     c = k_u.config
